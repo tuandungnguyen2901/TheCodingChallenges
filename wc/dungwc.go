@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"unicode"
 )
@@ -21,18 +22,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(flag.Args()) < 1 {
-		fmt.Println("Usage: dungwc [-w] [-l] [-m] [-c] <filename>")
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
+	var content []byte
+	var err error
 
-	filename := flag.Args()[0]
-
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		fmt.Printf("Error reading file: %s\n", err)
-		os.Exit(1)
+	if len(flag.Args()) > 0 {
+		filename := flag.Args()[0]
+		content, err = os.ReadFile(filename)
+		if err != nil {
+			fmt.Printf("Error reading file: %s\n", err)
+			os.Exit(1)
+		}
+	} else {
+		content, err = io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Printf("Error reading from standard input: %s\n", err)
+			os.Exit(1)
+		}
 	}
 
 	lines := countLines(string(content))
